@@ -23,7 +23,7 @@
 }
 
 .gallery-rendom__item {
-	background: #f6f4ef;
+	background: var(--gallery-rendom-content-background, #f6f4ef);
 	color: #222;
 	display: grid;
 	grid-template-columns: minmax(0, 3fr) minmax(20rem, 2fr);
@@ -93,7 +93,7 @@
 }
 
 .gallery-rendom__title {
-	color: #1f1f1f;
+	color: var(--gallery-rendom-title-color, #1f1f1f);
 	font-size: 4rem;
 	font-weight: 700;
 	letter-spacing: 0;
@@ -104,7 +104,7 @@
 }
 
 .gallery-rendom__description {
-	color: #3f3f3f;
+	color: var(--gallery-rendom-description-color, #3f3f3f);
 	font-size: 1.2rem;
 	line-height: 1.55;
 	max-width: 34rem;
@@ -129,7 +129,7 @@
 
 .gallery-rendom__button {
 	align-items: center;
-	border: 2px solid #004a89;
+	border: 2px solid var(--gallery-rendom-button-background, #004a89);
 	border-radius: 0;
 	display: inline-flex;
 	font-weight: 700;
@@ -148,32 +148,32 @@
 }
 
 .gallery-rendom__button:focus-visible {
-	outline: 3px solid #9b7a13;
+	outline: 3px solid var(--gallery-rendom-button-hover-background, #003764);
 	outline-offset: 3px;
 }
 
 .gallery-rendom__button--primary {
-	background: #004a89;
-	color: #fff;
+	background: var(--gallery-rendom-button-background, #004a89);
+	color: var(--gallery-rendom-button-text, #fff);
 }
 
 .gallery-rendom__button--secondary {
 	background: transparent;
-	border-color: #004a89;
-	color: #004a89;
+	border-color: var(--gallery-rendom-button-background, #004a89);
+	color: var(--gallery-rendom-button-background, #004a89);
 }
 
 .gallery-rendom__button--primary:hover,
 .gallery-rendom__button--primary:focus {
-	background: #003764;
-	border-color: #003764;
-	color: #fff;
+	background: var(--gallery-rendom-button-hover-background, #003764);
+	border-color: var(--gallery-rendom-button-hover-background, #003764);
+	color: var(--gallery-rendom-button-hover-text, #fff);
 }
 
 .gallery-rendom__button--secondary:hover,
 .gallery-rendom__button--secondary:focus {
-	background: #004a89;
-	color: #fff;
+	background: var(--gallery-rendom-button-background, #004a89);
+	color: var(--gallery-rendom-button-text, #fff);
 }
 
 .gallery-rendom__caption {

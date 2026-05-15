@@ -3,7 +3,7 @@ Contributors: Lobsang Wangdu
 Tags: gallery, random gallery, images
 Requires at least: 6.0
 Tested up to: 6.8
-Stable tag: 1.0.10
+Stable tag: 1.0.15
 License: GPLv2 or later
 
 Displays one randomized full-width hero image with title, description, buttons, and a hidden caption opened from an info icon.
@@ -21,3 +21,7 @@ Displays one randomized full-width hero image with title, description, buttons, 
 The hyphen shortcode also works:
 
 [gallery-rendom]
+
+== Settings ==
+Go to Gallery Rendom > Settings to change the text area background, title color, description color, and button colors with hex values such as #004a89 or 004a89.
+Use Reset to Default Colors to restore the built-in color defaults.
