@@ -3,7 +3,7 @@ Contributors: Lobsang Wangdu
 Tags: gallery, random gallery, images
 Requires at least: 6.0
 Tested up to: 6.8
-Stable tag: 1.0.15
+Stable tag: 1.0.16
 License: GPLv2 or later
 
 Displays one randomized full-width hero image with title, description, buttons, and a hidden caption opened from an info icon.

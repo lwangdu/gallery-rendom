@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gallery Rendom
  * Description: Displays one randomized hero gallery image with title, description, buttons, and click-to-view captions.
- * Version: 1.0.15
+ * Version: 1.0.16
  * Author: Lobsang Wangdu
  * Text Domain: gallery-rendom
  *
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GALLERY_RENDOM_VERSION', '1.0.15' );
+define( 'GALLERY_RENDOM_VERSION', '1.0.16' );
 define( 'GALLERY_RENDOM_LAST_COOKIE', 'gallery_rendom_last_item' );
 define( 'GALLERY_RENDOM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GALLERY_RENDOM_DEFAULT_CONTENT_BACKGROUND', '#f6f4ef' );

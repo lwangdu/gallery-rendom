@@ -93,14 +93,12 @@
 }
 
 .gallery-rendom__title {
-	color: var(--gallery-rendom-title-color, #1f1f1f);
-	font-size: 4rem;
+	font-size: 2.65rem !important;
 	font-weight: 700;
 	letter-spacing: 0;
 	line-height: 1;
 	margin: 0;
-	max-width: 11ch;
-	text-wrap: balance;
+	max-width: 100%;
 }
 
 .gallery-rendom__description {
@@ -205,12 +203,6 @@
 	.gallery-rendom__body {
 		padding: 2rem 1.5rem 2.5rem;
 	}
-
-	.gallery-rendom__title {
-		font-size: 2.85rem;
-		max-width: 12ch;
-	}
-
 	.gallery-rendom__description {
 		font-size: 1.05rem;
 	}
@@ -234,11 +226,6 @@
 		aspect-ratio: 4 / 3;
 		min-height: 16rem;
 	}
-
-	.gallery-rendom__title {
-		font-size: 2.35rem;
-	}
-
 	.gallery-rendom__actions {
 		align-items: stretch;
 		flex-direction: column;
