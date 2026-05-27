@@ -51,7 +51,7 @@
 
 .gallery-rendom__info {
 	align-items: center;
-	background: rgba(12, 21, 18, 0.86);
+	background: #0c1512;
 	border: 2px solid #fff;
 	border-radius: 999px;
 	bottom: 1.5rem;
@@ -129,15 +129,20 @@
 	align-items: center;
 	border: 2px solid var(--gallery-rendom-button-background, #004a89);
 	border-radius: 0;
+	box-sizing: border-box;
 	display: inline-flex;
 	font-weight: 700;
 	justify-content: center;
-	letter-spacing: 0.04em;
+	letter-spacing: 0;
 	line-height: 1.2;
+	max-width: 100%;
 	min-height: 3rem;
+	overflow-wrap: anywhere;
 	padding: 0.8rem 1.2rem;
+	text-align: center;
 	text-decoration: none;
 	text-transform: uppercase;
+	white-space: normal;
 }
 
 .gallery-rendom__button:hover,
@@ -208,8 +213,9 @@
 	}
 
 	.gallery-rendom__button {
-		font-size: 0.9rem;
+		font-size: 16px;
 		min-height: 2.75rem;
+		padding: 0.75rem 0.75rem;
 	}
 
 	.gallery-rendom__caption {
@@ -232,6 +238,9 @@
 	}
 
 	.gallery-rendom__button {
+		font-size: 16px;
+		line-height: 1.25;
+		padding: 0.75rem 0.6rem;
 		width: 100%;
 	}
 }

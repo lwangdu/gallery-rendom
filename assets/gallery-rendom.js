@@ -30,7 +30,13 @@
 			return;
 		}
 
-		document.querySelectorAll( '.gallery-rendom__info[aria-expanded="true"]' ).forEach( function ( button ) {
+		var item = event.target.closest ? event.target.closest( '.gallery-rendom__item' ) : null;
+
+		if ( ! item ) {
+			return;
+		}
+
+		item.querySelectorAll( '.gallery-rendom__info[aria-expanded="true"]' ).forEach( function ( button ) {
 			var caption = document.getElementById( button.getAttribute( 'aria-controls' ) );
 			var label = button.querySelector( '.screen-reader-text' );
 

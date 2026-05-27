@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gallery Rendom
  * Description: Displays one randomized hero gallery image with title, description, buttons, and click-to-view captions.
- * Version: 1.0.16
+ * Version: 1.0.22
  * Author: Lobsang Wangdu
  * Text Domain: gallery-rendom
  *
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GALLERY_RENDOM_VERSION', '1.0.16' );
+define( 'GALLERY_RENDOM_VERSION', '1.0.22' );
 define( 'GALLERY_RENDOM_LAST_COOKIE', 'gallery_rendom_last_item' );
 define( 'GALLERY_RENDOM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GALLERY_RENDOM_DEFAULT_CONTENT_BACKGROUND', '#f6f4ef' );
@@ -23,6 +23,7 @@ define( 'GALLERY_RENDOM_DEFAULT_BUTTON_BACKGROUND', '#004a89' );
 define( 'GALLERY_RENDOM_DEFAULT_BUTTON_TEXT', '#ffffff' );
 define( 'GALLERY_RENDOM_DEFAULT_BUTTON_HOVER_BACKGROUND', '#003764' );
 define( 'GALLERY_RENDOM_DEFAULT_BUTTON_HOVER_TEXT', '#ffffff' );
+define( 'GALLERY_RENDOM_ITEM_IDS_TRANSIENT', 'gallery_rendom_item_ids' );
 
 /**
  * Register gallery item post type.
@@ -55,6 +56,35 @@ function gallery_rendom_register_post_type() {
 	);
 }
 add_action( 'init', 'gallery_rendom_register_post_type' );
+
+/**
+ * Register the block editor wrapper for the shortcode.
+ */
+function gallery_rendom_register_block() {
+	wp_register_script(
+		'gallery-rendom-block',
+		GALLERY_RENDOM_PLUGIN_URL . 'assets/gallery-rendom-block.js',
+		array( 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-element', 'wp-i18n', 'wp-server-side-render' ),
+		GALLERY_RENDOM_VERSION,
+		true
+	);
+
+	register_block_type(
+		'gallery-rendom/random-hero',
+		array(
+			'api_version'     => 2,
+			'editor_script'   => 'gallery-rendom-block',
+			'render_callback' => 'gallery_rendom_render_block',
+			'attributes'      => array(
+				'headingLevel' => array(
+					'type'    => 'number',
+					'default' => 2,
+				),
+			),
+		)
+	);
+}
+add_action( 'init', 'gallery_rendom_register_block' );
 
 /**
  * Add item settings meta box.
@@ -180,6 +210,23 @@ function gallery_rendom_save_meta( $post_id ) {
 add_action( 'save_post_gallery_rendom_item', 'gallery_rendom_save_meta' );
 
 /**
+ * Clear cached gallery item IDs when item content changes.
+ *
+ * @param int $post_id Changed post ID.
+ */
+function gallery_rendom_clear_item_ids_cache( $post_id = 0 ) {
+	if ( $post_id && 'gallery_rendom_item' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	delete_transient( GALLERY_RENDOM_ITEM_IDS_TRANSIENT );
+}
+add_action( 'save_post_gallery_rendom_item', 'gallery_rendom_clear_item_ids_cache' );
+add_action( 'deleted_post', 'gallery_rendom_clear_item_ids_cache' );
+add_action( 'trashed_post', 'gallery_rendom_clear_item_ids_cache' );
+add_action( 'untrashed_post', 'gallery_rendom_clear_item_ids_cache' );
+
+/**
  * Add plugin settings page.
  */
 function gallery_rendom_add_settings_page() {
@@ -233,10 +280,16 @@ function gallery_rendom_render_settings_page() {
 	$content_background = gallery_rendom_get_content_background();
 	$text_colors        = gallery_rendom_get_text_colors();
 	$button_colors      = gallery_rendom_get_button_colors();
+	$reset_notice_key   = 'gallery_rendom_reset_notice_' . get_current_user_id();
+	$show_reset_notice  = get_transient( $reset_notice_key );
+
+	if ( $show_reset_notice ) {
+		delete_transient( $reset_notice_key );
+	}
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Gallery Rendom Settings', 'gallery-rendom' ); ?></h1>
-		<?php if ( isset( $_GET['gallery-rendom-reset'] ) ) : ?>
+		<?php if ( $show_reset_notice ) : ?>
 			<div class="notice notice-success is-dismissible">
 				<p><?php esc_html_e( 'Gallery Rendom color settings were reset to defaults.', 'gallery-rendom' ); ?></p>
 			</div>
@@ -339,12 +392,10 @@ function gallery_rendom_reset_colors() {
 	update_option( 'gallery_rendom_button_hover_background', GALLERY_RENDOM_DEFAULT_BUTTON_HOVER_BACKGROUND );
 	update_option( 'gallery_rendom_button_hover_text', GALLERY_RENDOM_DEFAULT_BUTTON_HOVER_TEXT );
 
+	set_transient( 'gallery_rendom_reset_notice_' . get_current_user_id(), 1, MINUTE_IN_SECONDS );
+
 	wp_safe_redirect(
-		add_query_arg(
-			'gallery-rendom-reset',
-			'1',
-			admin_url( 'edit.php?post_type=gallery_rendom_item&page=gallery-rendom-settings' )
-		)
+		admin_url( 'edit.php?post_type=gallery_rendom_item&page=gallery-rendom-settings' )
 	);
 	exit;
 }
@@ -468,6 +519,7 @@ add_action( 'wp_enqueue_scripts', 'gallery_rendom_register_assets' );
  * Enqueue the best available frontend behavior script.
  */
 function gallery_rendom_enqueue_frontend_behavior() {
+	// Shortcode rendering normally happens before wp_footer, so this still prints on pages that use the shortcode.
 	if ( function_exists( 'wp_enqueue_script_module' ) ) {
 		wp_enqueue_script_module( 'gallery-rendom/view' );
 	} else {
@@ -481,21 +533,28 @@ function gallery_rendom_enqueue_frontend_behavior() {
  * @return int
  */
 function gallery_rendom_get_random_item_id() {
-	$item_ids = get_posts(
-		array(
-			'post_type'              => 'gallery_rendom_item',
-			'post_status'            => 'publish',
-			'posts_per_page'         => -1,
-			'fields'                 => 'ids',
-			'orderby'                => 'menu_order',
-			'order'                  => 'ASC',
-			'ignore_sticky_posts'    => true,
-			'no_found_rows'          => true,
-			'cache_results'          => false,
-			'update_post_meta_cache' => false,
-			'update_post_term_cache' => false,
-		)
-	);
+	$item_ids = get_transient( GALLERY_RENDOM_ITEM_IDS_TRANSIENT );
+
+	if ( false === $item_ids ) {
+		$item_ids = get_posts(
+			array(
+				'post_type'              => 'gallery_rendom_item',
+				'post_status'            => 'publish',
+				'posts_per_page'         => -1,
+				'fields'                 => 'ids',
+				'orderby'                => 'menu_order',
+				'order'                  => 'ASC',
+				'ignore_sticky_posts'    => true,
+				'no_found_rows'          => true,
+				'cache_results'          => false,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+		$item_ids = array_map( 'absint', $item_ids );
+
+		set_transient( GALLERY_RENDOM_ITEM_IDS_TRANSIENT, $item_ids, DAY_IN_SECONDS );
+	}
 
 	if ( ! $item_ids ) {
 		return 0;
@@ -560,6 +619,7 @@ function gallery_rendom_render_shortcode( $atts ) {
 	}
 
 	if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+		// Some full-page caches decide before shortcodes run; exclude pages manually if this is too late.
 		define( 'DONOTCACHEPAGE', true );
 	}
 
@@ -613,11 +673,12 @@ function gallery_rendom_render_shortcode( $atts ) {
 			$title_id           = 'gallery-rendom-title-' . $post_id;
 			$description_id     = 'gallery-rendom-description-' . $post_id;
 			$caption_id         = 'gallery-rendom-caption-' . $post_id;
-			$description        = get_the_excerpt() ? get_the_excerpt() : wp_strip_all_tags( get_the_content() );
-			$description_html   = wpautop( wp_trim_words( $description, 32, '&hellip;' ) );
+			$description        = trim( get_the_excerpt() ? get_the_excerpt() : wp_strip_all_tags( get_the_content() ) );
+			$description        = trim( wp_trim_words( $description, 32, '&hellip;' ) );
+			$description_html   = $description ? wpautop( $description ) : '';
 			$describedby        = array();
 
-			if ( $description_html ) {
+			if ( $description ) {
 				$describedby[] = $description_id;
 			}
 
@@ -660,7 +721,7 @@ function gallery_rendom_render_shortcode( $atts ) {
 
 				<div class="gallery-rendom__body">
 					<<?php echo esc_html( $heading_tag ); ?> class="gallery-rendom__title" id="<?php echo esc_attr( $title_id ); ?>"><?php the_title(); ?></<?php echo esc_html( $heading_tag ); ?>>
-					<?php if ( $description_html ) : ?>
+					<?php if ( $description ) : ?>
 						<div class="gallery-rendom__description" id="<?php echo esc_attr( $description_id ); ?>"><?php echo wp_kses_post( $description_html ); ?></div>
 					<?php endif; ?>
 
@@ -687,5 +748,21 @@ function gallery_rendom_render_shortcode( $atts ) {
 
 	return ob_get_clean();
 }
+
+/**
+ * Render the block using the shortcode renderer so editor and shortcode output stay aligned.
+ *
+ * @param array $attributes Block attributes.
+ * @return string
+ */
+function gallery_rendom_render_block( $attributes ) {
+	return gallery_rendom_render_shortcode(
+		array(
+			'heading_level' => isset( $attributes['headingLevel'] ) ? absint( $attributes['headingLevel'] ) : 2,
+		)
+	);
+}
+
+// Keep the original underscore shortcode and the documented hyphen alias for existing content compatibility.
 add_shortcode( 'gallery_rendom', 'gallery_rendom_render_shortcode' );
 add_shortcode( 'gallery-rendom', 'gallery_rendom_render_shortcode' );
