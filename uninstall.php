@@ -2,7 +2,7 @@
 /**
  * Plugin uninstall cleanup.
  *
- * @package GalleryRendom
+ * @package GalleryRandom
  */
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -25,4 +25,4 @@ foreach ( $gallery_rendom_options as $gallery_rendom_option ) {
 
 delete_transient( 'gallery_rendom_item_ids' );
 
-// Gallery Rendom Item posts are user content, so uninstall intentionally leaves them in place.
+// Gallery Random Item posts are user content, so uninstall intentionally leaves them in place.

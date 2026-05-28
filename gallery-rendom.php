@@ -1,19 +1,19 @@
 <?php
 /**
- * Plugin Name: Gallery Rendom
+ * Plugin Name: Gallery Random
  * Description: Displays one randomized hero gallery image with title, description, buttons, and click-to-view captions.
- * Version: 1.0.22
+ * Version: 1.0.24
  * Author: Lobsang Wangdu
- * Text Domain: gallery-rendom
+ * Text Domain: gallery-random
  *
- * @package GalleryRendom
+ * @package GalleryRandom
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GALLERY_RENDOM_VERSION', '1.0.22' );
+define( 'GALLERY_RENDOM_VERSION', '1.0.24' );
 define( 'GALLERY_RENDOM_LAST_COOKIE', 'gallery_rendom_last_item' );
 define( 'GALLERY_RENDOM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GALLERY_RENDOM_DEFAULT_CONTENT_BACKGROUND', '#f6f4ef' );
@@ -30,16 +30,16 @@ define( 'GALLERY_RENDOM_ITEM_IDS_TRANSIENT', 'gallery_rendom_item_ids' );
  */
 function gallery_rendom_register_post_type() {
 	$labels = array(
-		'name'               => __( 'Gallery Rendom Items', 'gallery-rendom' ),
-		'singular_name'      => __( 'Gallery Rendom Item', 'gallery-rendom' ),
-		'add_new_item'       => __( 'Add New Gallery Item', 'gallery-rendom' ),
-		'edit_item'          => __( 'Edit Gallery Item', 'gallery-rendom' ),
-		'new_item'           => __( 'New Gallery Item', 'gallery-rendom' ),
-		'view_item'          => __( 'View Gallery Item', 'gallery-rendom' ),
-		'search_items'       => __( 'Search Gallery Items', 'gallery-rendom' ),
-		'not_found'          => __( 'No gallery items found.', 'gallery-rendom' ),
-		'not_found_in_trash' => __( 'No gallery items found in Trash.', 'gallery-rendom' ),
-		'menu_name'          => __( 'Gallery Rendom', 'gallery-rendom' ),
+		'name'               => __( 'Gallery Random Items', 'gallery-random' ),
+		'singular_name'      => __( 'Gallery Random Item', 'gallery-random' ),
+		'add_new_item'       => __( 'Add New Gallery Item', 'gallery-random' ),
+		'edit_item'          => __( 'Edit Gallery Item', 'gallery-random' ),
+		'new_item'           => __( 'New Gallery Item', 'gallery-random' ),
+		'view_item'          => __( 'View Gallery Item', 'gallery-random' ),
+		'search_items'       => __( 'Search Gallery Items', 'gallery-random' ),
+		'not_found'          => __( 'No gallery items found.', 'gallery-random' ),
+		'not_found_in_trash' => __( 'No gallery items found in Trash.', 'gallery-random' ),
+		'menu_name'          => __( 'Gallery Random', 'gallery-random' ),
 	);
 
 	register_post_type(
@@ -62,18 +62,32 @@ add_action( 'init', 'gallery_rendom_register_post_type' );
  */
 function gallery_rendom_register_block() {
 	wp_register_script(
-		'gallery-rendom-block',
-		GALLERY_RENDOM_PLUGIN_URL . 'assets/gallery-rendom-block.js',
+		'gallery-random-block',
+		GALLERY_RENDOM_PLUGIN_URL . 'assets/gallery-random-block.js',
 		array( 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-element', 'wp-i18n', 'wp-server-side-render' ),
 		GALLERY_RENDOM_VERSION,
 		true
 	);
 
 	register_block_type(
+		'gallery-random/random-hero',
+		array(
+			'api_version'     => 2,
+			'editor_script'   => 'gallery-random-block',
+			'render_callback' => 'gallery_rendom_render_block',
+			'attributes'      => array(
+				'headingLevel' => array(
+					'type'    => 'number',
+					'default' => 2,
+				),
+			),
+		)
+	);
+
+	register_block_type(
 		'gallery-rendom/random-hero',
 		array(
 			'api_version'     => 2,
-			'editor_script'   => 'gallery-rendom-block',
 			'render_callback' => 'gallery_rendom_render_block',
 			'attributes'      => array(
 				'headingLevel' => array(
@@ -92,7 +106,7 @@ add_action( 'init', 'gallery_rendom_register_block' );
 function gallery_rendom_add_meta_boxes() {
 	add_meta_box(
 		'gallery_rendom_details',
-		__( 'Gallery Item Details', 'gallery-rendom' ),
+		__( 'Gallery Item Details', 'gallery-random' ),
 		'gallery_rendom_render_meta_box',
 		'gallery_rendom_item',
 		'normal',
@@ -115,7 +129,7 @@ function gallery_rendom_render_meta_box( $post ) {
 	$secondary_label    = get_post_meta( $post->ID, '_gallery_rendom_secondary_label', true );
 	$secondary_url      = get_post_meta( $post->ID, '_gallery_rendom_secondary_url', true );
 	$image_position     = get_post_meta( $post->ID, '_gallery_rendom_image_position', true );
-	$featured_image_tip = __( 'Use the Featured Image box for this hero image. The post title and editor content are displayed over the image.', 'gallery-rendom' );
+	$featured_image_tip = __( 'Use the Featured Image box for this hero image. The post title and editor content are displayed over the image.', 'gallery-random' );
 
 	if ( ! $image_position ) {
 		$image_position = 'center center';
@@ -124,15 +138,15 @@ function gallery_rendom_render_meta_box( $post ) {
 	<p><?php echo esc_html( $featured_image_tip ); ?></p>
 
 	<p>
-		<label for="gallery_rendom_image_position"><strong><?php esc_html_e( 'Image Focal Position', 'gallery-rendom' ); ?></strong></label>
+		<label for="gallery_rendom_image_position"><strong><?php esc_html_e( 'Image Focal Position', 'gallery-random' ); ?></strong></label>
 		<select class="widefat" id="gallery_rendom_image_position" name="gallery_rendom_image_position">
 			<?php
 			$image_positions = array(
-				'center center' => __( 'Center', 'gallery-rendom' ),
-				'center top'    => __( 'Top', 'gallery-rendom' ),
-				'center bottom' => __( 'Bottom', 'gallery-rendom' ),
-				'left center'   => __( 'Left', 'gallery-rendom' ),
-				'right center'  => __( 'Right', 'gallery-rendom' ),
+				'center center' => __( 'Center', 'gallery-random' ),
+				'center top'    => __( 'Top', 'gallery-random' ),
+				'center bottom' => __( 'Bottom', 'gallery-random' ),
+				'left center'   => __( 'Left', 'gallery-random' ),
+				'right center'  => __( 'Right', 'gallery-random' ),
 			);
 
 			foreach ( $image_positions as $value => $label ) :
@@ -143,25 +157,25 @@ function gallery_rendom_render_meta_box( $post ) {
 	</p>
 
 	<p>
-		<label for="gallery_rendom_caption"><strong><?php esc_html_e( 'Hidden Caption', 'gallery-rendom' ); ?></strong></label>
+		<label for="gallery_rendom_caption"><strong><?php esc_html_e( 'Hidden Caption', 'gallery-random' ); ?></strong></label>
 		<textarea class="widefat" id="gallery_rendom_caption" name="gallery_rendom_caption" rows="3"><?php echo esc_textarea( $caption ); ?></textarea>
 	</p>
 
 	<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
 		<p>
-			<label for="gallery_rendom_primary_label"><strong><?php esc_html_e( 'Primary Button Text', 'gallery-rendom' ); ?></strong></label>
+			<label for="gallery_rendom_primary_label"><strong><?php esc_html_e( 'Primary Button Text', 'gallery-random' ); ?></strong></label>
 			<input class="widefat" id="gallery_rendom_primary_label" name="gallery_rendom_primary_label" type="text" value="<?php echo esc_attr( $primary_label ); ?>">
 		</p>
 		<p>
-			<label for="gallery_rendom_primary_url"><strong><?php esc_html_e( 'Primary Button URL', 'gallery-rendom' ); ?></strong></label>
+			<label for="gallery_rendom_primary_url"><strong><?php esc_html_e( 'Primary Button URL', 'gallery-random' ); ?></strong></label>
 			<input class="widefat" id="gallery_rendom_primary_url" name="gallery_rendom_primary_url" type="url" value="<?php echo esc_url( $primary_url ); ?>">
 		</p>
 		<p>
-			<label for="gallery_rendom_secondary_label"><strong><?php esc_html_e( 'Secondary Button Text', 'gallery-rendom' ); ?></strong></label>
+			<label for="gallery_rendom_secondary_label"><strong><?php esc_html_e( 'Secondary Button Text', 'gallery-random' ); ?></strong></label>
 			<input class="widefat" id="gallery_rendom_secondary_label" name="gallery_rendom_secondary_label" type="text" value="<?php echo esc_attr( $secondary_label ); ?>">
 		</p>
 		<p>
-			<label for="gallery_rendom_secondary_url"><strong><?php esc_html_e( 'Secondary Button URL', 'gallery-rendom' ); ?></strong></label>
+			<label for="gallery_rendom_secondary_url"><strong><?php esc_html_e( 'Secondary Button URL', 'gallery-random' ); ?></strong></label>
 			<input class="widefat" id="gallery_rendom_secondary_url" name="gallery_rendom_secondary_url" type="url" value="<?php echo esc_url( $secondary_url ); ?>">
 		</p>
 	</div>
@@ -232,10 +246,10 @@ add_action( 'untrashed_post', 'gallery_rendom_clear_item_ids_cache' );
 function gallery_rendom_add_settings_page() {
 	add_submenu_page(
 		'edit.php?post_type=gallery_rendom_item',
-		__( 'Gallery Rendom Settings', 'gallery-rendom' ),
-		__( 'Settings', 'gallery-rendom' ),
+		__( 'Gallery Random Settings', 'gallery-random' ),
+		__( 'Settings', 'gallery-random' ),
 		'manage_options',
-		'gallery-rendom-settings',
+		'gallery-random-settings',
 		'gallery_rendom_render_settings_page'
 	);
 }
@@ -288,10 +302,10 @@ function gallery_rendom_render_settings_page() {
 	}
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Gallery Rendom Settings', 'gallery-rendom' ); ?></h1>
+		<h1><?php esc_html_e( 'Gallery Random Settings', 'gallery-random' ); ?></h1>
 		<?php if ( $show_reset_notice ) : ?>
 			<div class="notice notice-success is-dismissible">
-				<p><?php esc_html_e( 'Gallery Rendom color settings were reset to defaults.', 'gallery-rendom' ); ?></p>
+				<p><?php esc_html_e( 'Gallery Random color settings were reset to defaults.', 'gallery-random' ); ?></p>
 			</div>
 		<?php endif; ?>
 		<form method="post" action="options.php">
@@ -299,65 +313,65 @@ function gallery_rendom_render_settings_page() {
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row">
-						<label for="gallery_rendom_content_background"><?php esc_html_e( 'Text Area Background Color', 'gallery-rendom' ); ?></label>
+						<label for="gallery_rendom_content_background"><?php esc_html_e( 'Text Area Background Color', 'gallery-random' ); ?></label>
 					</th>
 					<td>
 						<input class="regular-text" id="gallery_rendom_content_background" name="gallery_rendom_content_background" type="text" value="<?php echo esc_attr( $content_background ); ?>" pattern="^#?[0-9a-fA-F]{6}$" placeholder="#f6f4ef">
-						<p class="description"><?php esc_html_e( 'Enter a 6-digit hex color, for example #004a89 or 004a89. This controls the right-side title, description, and button area background.', 'gallery-rendom' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Enter a 6-digit hex color, for example #004a89 or 004a89. This controls the right-side title, description, and button area background.', 'gallery-random' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="gallery_rendom_title_color"><?php esc_html_e( 'Title Text Color', 'gallery-rendom' ); ?></label>
+						<label for="gallery_rendom_title_color"><?php esc_html_e( 'Title Text Color', 'gallery-random' ); ?></label>
 					</th>
 					<td>
 						<input class="regular-text" id="gallery_rendom_title_color" name="gallery_rendom_title_color" type="text" value="<?php echo esc_attr( $text_colors['title'] ); ?>" pattern="^#?[0-9a-fA-F]{6}$" placeholder="#1f1f1f">
-						<p class="description"><?php esc_html_e( 'Title color for the text area.', 'gallery-rendom' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Title color for the text area.', 'gallery-random' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="gallery_rendom_description_color"><?php esc_html_e( 'Description Text Color', 'gallery-rendom' ); ?></label>
+						<label for="gallery_rendom_description_color"><?php esc_html_e( 'Description Text Color', 'gallery-random' ); ?></label>
 					</th>
 					<td>
 						<input class="regular-text" id="gallery_rendom_description_color" name="gallery_rendom_description_color" type="text" value="<?php echo esc_attr( $text_colors['description'] ); ?>" pattern="^#?[0-9a-fA-F]{6}$" placeholder="#3f3f3f">
-						<p class="description"><?php esc_html_e( 'Description color for the text area.', 'gallery-rendom' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Description color for the text area.', 'gallery-random' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="gallery_rendom_button_background"><?php esc_html_e( 'Button Background Color', 'gallery-rendom' ); ?></label>
+						<label for="gallery_rendom_button_background"><?php esc_html_e( 'Button Background Color', 'gallery-random' ); ?></label>
 					</th>
 					<td>
 						<input class="regular-text" id="gallery_rendom_button_background" name="gallery_rendom_button_background" type="text" value="<?php echo esc_attr( $button_colors['background'] ); ?>" pattern="^#?[0-9a-fA-F]{6}$" placeholder="#004a89">
-						<p class="description"><?php esc_html_e( 'Primary button background and secondary button border/text color.', 'gallery-rendom' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Primary button background and secondary button border/text color.', 'gallery-random' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="gallery_rendom_button_text"><?php esc_html_e( 'Button Text Color', 'gallery-rendom' ); ?></label>
+						<label for="gallery_rendom_button_text"><?php esc_html_e( 'Button Text Color', 'gallery-random' ); ?></label>
 					</th>
 					<td>
 						<input class="regular-text" id="gallery_rendom_button_text" name="gallery_rendom_button_text" type="text" value="<?php echo esc_attr( $button_colors['text'] ); ?>" pattern="^#?[0-9a-fA-F]{6}$" placeholder="#ffffff">
-						<p class="description"><?php esc_html_e( 'Primary button text color.', 'gallery-rendom' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Primary button text color.', 'gallery-random' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="gallery_rendom_button_hover_background"><?php esc_html_e( 'Button Hover Background Color', 'gallery-rendom' ); ?></label>
+						<label for="gallery_rendom_button_hover_background"><?php esc_html_e( 'Button Hover Background Color', 'gallery-random' ); ?></label>
 					</th>
 					<td>
 						<input class="regular-text" id="gallery_rendom_button_hover_background" name="gallery_rendom_button_hover_background" type="text" value="<?php echo esc_attr( $button_colors['hover_background'] ); ?>" pattern="^#?[0-9a-fA-F]{6}$" placeholder="#003764">
-						<p class="description"><?php esc_html_e( 'Primary button hover background and secondary button hover background.', 'gallery-rendom' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Primary button hover background and secondary button hover background.', 'gallery-random' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="gallery_rendom_button_hover_text"><?php esc_html_e( 'Button Hover Text Color', 'gallery-rendom' ); ?></label>
+						<label for="gallery_rendom_button_hover_text"><?php esc_html_e( 'Button Hover Text Color', 'gallery-random' ); ?></label>
 					</th>
 					<td>
 						<input class="regular-text" id="gallery_rendom_button_hover_text" name="gallery_rendom_button_hover_text" type="text" value="<?php echo esc_attr( $button_colors['hover_text'] ); ?>" pattern="^#?[0-9a-fA-F]{6}$" placeholder="#ffffff">
-						<p class="description"><?php esc_html_e( 'Button text color on hover and focus.', 'gallery-rendom' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Button text color on hover and focus.', 'gallery-random' ); ?></p>
 					</td>
 				</tr>
 			</table>
@@ -367,8 +381,8 @@ function gallery_rendom_render_settings_page() {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="gallery_rendom_reset_colors">
 			<?php wp_nonce_field( 'gallery_rendom_reset_colors' ); ?>
-			<p><?php esc_html_e( 'Reset all Gallery Rendom color settings to their default values.', 'gallery-rendom' ); ?></p>
-			<?php submit_button( __( 'Reset to Default Colors', 'gallery-rendom' ), 'secondary', 'submit', false ); ?>
+			<p><?php esc_html_e( 'Reset all Gallery Random color settings to their default values.', 'gallery-random' ); ?></p>
+			<?php submit_button( __( 'Reset to Default Colors', 'gallery-random' ), 'secondary', 'submit', false ); ?>
 		</form>
 	</div>
 	<?php
@@ -379,7 +393,7 @@ function gallery_rendom_render_settings_page() {
  */
 function gallery_rendom_reset_colors() {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have permission to reset these settings.', 'gallery-rendom' ) );
+		wp_die( esc_html__( 'You do not have permission to reset these settings.', 'gallery-random' ) );
 	}
 
 	check_admin_referer( 'gallery_rendom_reset_colors' );
@@ -395,7 +409,7 @@ function gallery_rendom_reset_colors() {
 	set_transient( 'gallery_rendom_reset_notice_' . get_current_user_id(), 1, MINUTE_IN_SECONDS );
 
 	wp_safe_redirect(
-		admin_url( 'edit.php?post_type=gallery_rendom_item&page=gallery-rendom-settings' )
+		admin_url( 'edit.php?post_type=gallery_rendom_item&page=gallery-random-settings' )
 	);
 	exit;
 }
@@ -490,23 +504,23 @@ function gallery_rendom_sanitize_image_position( $value ) {
  */
 function gallery_rendom_register_assets() {
 	wp_register_style(
-		'gallery-rendom',
-		GALLERY_RENDOM_PLUGIN_URL . 'assets/gallery-rendom.css',
+		'gallery-random',
+		GALLERY_RENDOM_PLUGIN_URL . 'assets/gallery-random.css',
 		array(),
 		GALLERY_RENDOM_VERSION
 	);
 
 	if ( function_exists( 'wp_register_script_module' ) ) {
 		wp_register_script_module(
-			'gallery-rendom/view',
-			GALLERY_RENDOM_PLUGIN_URL . 'assets/gallery-rendom-view.js',
+			'gallery-random/view',
+			GALLERY_RENDOM_PLUGIN_URL . 'assets/gallery-random-view.js',
 			array( '@wordpress/interactivity' ),
 			GALLERY_RENDOM_VERSION
 		);
 	} else {
 		wp_register_script(
-			'gallery-rendom',
-			GALLERY_RENDOM_PLUGIN_URL . 'assets/gallery-rendom.js',
+			'gallery-random',
+			GALLERY_RENDOM_PLUGIN_URL . 'assets/gallery-random.js',
 			array(),
 			GALLERY_RENDOM_VERSION,
 			true
@@ -521,9 +535,9 @@ add_action( 'wp_enqueue_scripts', 'gallery_rendom_register_assets' );
 function gallery_rendom_enqueue_frontend_behavior() {
 	// Shortcode rendering normally happens before wp_footer, so this still prints on pages that use the shortcode.
 	if ( function_exists( 'wp_enqueue_script_module' ) ) {
-		wp_enqueue_script_module( 'gallery-rendom/view' );
+		wp_enqueue_script_module( 'gallery-random/view' );
 	} else {
-		wp_enqueue_script( 'gallery-rendom' );
+		wp_enqueue_script( 'gallery-random' );
 	}
 }
 
@@ -640,7 +654,7 @@ function gallery_rendom_render_shortcode( $atts ) {
 		return '';
 	}
 
-	wp_enqueue_style( 'gallery-rendom' );
+	wp_enqueue_style( 'gallery-random' );
 	gallery_rendom_enqueue_frontend_behavior();
 
 	ob_start();
@@ -688,11 +702,11 @@ function gallery_rendom_render_shortcode( $atts ) {
 
 			$context = array(
 				'isCaptionOpen'  => false,
-				'showCaptionText' => __( 'Show image caption', 'gallery-rendom' ),
-				'hideCaptionText' => __( 'Hide image caption', 'gallery-rendom' ),
+				'showCaptionText' => __( 'Show image caption', 'gallery-random' ),
+				'hideCaptionText' => __( 'Hide image caption', 'gallery-random' ),
 			);
 			?>
-			<article class="gallery-rendom__item" style="<?php echo esc_attr( $style ); ?>" data-wp-interactive="galleryRendom" data-wp-context="<?php echo esc_attr( wp_json_encode( $context ) ); ?>" data-wp-on-document--keydown="actions.closeCaptionOnEscape" aria-labelledby="<?php echo esc_attr( $title_id ); ?>"<?php echo $describedby ? ' aria-describedby="' . esc_attr( implode( ' ', $describedby ) ) . '"' : ''; ?>>
+			<article class="gallery-rendom__item" style="<?php echo esc_attr( $style ); ?>" data-wp-interactive="galleryRandom" data-wp-context="<?php echo esc_attr( wp_json_encode( $context ) ); ?>" data-wp-on-document--keydown="actions.closeCaptionOnEscape" aria-labelledby="<?php echo esc_attr( $title_id ); ?>"<?php echo $describedby ? ' aria-describedby="' . esc_attr( implode( ' ', $describedby ) ) . '"' : ''; ?>>
 				<div class="gallery-rendom__media">
 					<?php
 					if ( has_post_thumbnail() ) {
@@ -714,7 +728,7 @@ function gallery_rendom_render_shortcode( $atts ) {
 					<?php if ( $caption ) : ?>
 						<button class="gallery-rendom__info" type="button" aria-expanded="false" aria-controls="<?php echo esc_attr( $caption_id ); ?>" data-wp-on--click="actions.toggleCaption" data-wp-bind--aria-expanded="context.isCaptionOpen">
 							<span aria-hidden="true">i</span>
-							<span class="screen-reader-text" data-wp-text="state.captionButtonLabel"><?php esc_html_e( 'Show image caption', 'gallery-rendom' ); ?></span>
+							<span class="screen-reader-text" data-wp-text="state.captionButtonLabel"><?php esc_html_e( 'Show image caption', 'gallery-random' ); ?></span>
 						</button>
 					<?php endif; ?>
 				</div>
@@ -763,6 +777,8 @@ function gallery_rendom_render_block( $attributes ) {
 	);
 }
 
-// Keep the original underscore shortcode and the documented hyphen alias for existing content compatibility.
+// Keep the misspelled legacy shortcodes for existing content compatibility.
+add_shortcode( 'gallery_random', 'gallery_rendom_render_shortcode' );
+add_shortcode( 'gallery-random', 'gallery_rendom_render_shortcode' );
 add_shortcode( 'gallery_rendom', 'gallery_rendom_render_shortcode' );
 add_shortcode( 'gallery-rendom', 'gallery_rendom_render_shortcode' );

@@ -2,5 +2,5 @@
 /**
  * Silence is golden.
  *
- * @package GalleryRendom
+ * @package GalleryRandom
  */

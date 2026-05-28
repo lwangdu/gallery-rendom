@@ -1,6 +1,6 @@
 import { getContext, store, withSyncEvent } from '@wordpress/interactivity';
 
-store( 'galleryRendom', {
+store( 'galleryRandom', {
 	state: {
 		get captionButtonLabel() {
 			const context = getContext();

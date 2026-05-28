@@ -6,17 +6,17 @@
 	var SelectControl = components.SelectControl;
 	var ServerSideRender = serverSideRender.default || serverSideRender;
 	var headingLevelOptions = [
-		{ label: i18n.__( 'Heading 1', 'gallery-rendom' ), value: 1 },
-		{ label: i18n.__( 'Heading 2', 'gallery-rendom' ), value: 2 },
-		{ label: i18n.__( 'Heading 3', 'gallery-rendom' ), value: 3 },
-		{ label: i18n.__( 'Heading 4', 'gallery-rendom' ), value: 4 },
-		{ label: i18n.__( 'Heading 5', 'gallery-rendom' ), value: 5 },
-		{ label: i18n.__( 'Heading 6', 'gallery-rendom' ), value: 6 },
+		{ label: i18n.__( 'Heading 1', 'gallery-random' ), value: 1 },
+		{ label: i18n.__( 'Heading 2', 'gallery-random' ), value: 2 },
+		{ label: i18n.__( 'Heading 3', 'gallery-random' ), value: 3 },
+		{ label: i18n.__( 'Heading 4', 'gallery-random' ), value: 4 },
+		{ label: i18n.__( 'Heading 5', 'gallery-random' ), value: 5 },
+		{ label: i18n.__( 'Heading 6', 'gallery-random' ), value: 6 },
 	];
 
-	blocks.registerBlockType( 'gallery-rendom/random-hero', {
-		title: i18n.__( 'Gallery Rendom', 'gallery-rendom' ),
-		description: i18n.__( 'Displays one random Gallery Rendom item.', 'gallery-rendom' ),
+	blocks.registerBlockType( 'gallery-random/random-hero', {
+		title: i18n.__( 'Gallery Random', 'gallery-random' ),
+		description: i18n.__( 'Displays one random Gallery Random item.', 'gallery-random' ),
 		category: 'widgets',
 		icon: 'format-gallery',
 		supports: {
@@ -38,10 +38,10 @@
 					createElement(
 						PanelBody,
 						{
-							title: i18n.__( 'Gallery Rendom Settings', 'gallery-rendom' ),
+							title: i18n.__( 'Gallery Random Settings', 'gallery-random' ),
 						},
 						createElement( SelectControl, {
-							label: i18n.__( 'Heading level', 'gallery-rendom' ),
+							label: i18n.__( 'Heading level', 'gallery-random' ),
 							value: props.attributes.headingLevel,
 							options: headingLevelOptions,
 							onChange: function ( value ) {
@@ -53,7 +53,7 @@
 					)
 				),
 				createElement( ServerSideRender, {
-					block: 'gallery-rendom/random-hero',
+					block: 'gallery-random/random-hero',
 					attributes: props.attributes,
 				} )
 			);
